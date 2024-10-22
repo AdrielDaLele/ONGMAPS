@@ -14,6 +14,9 @@ class _GoogleMapsFlutterState extends State<GoogleMapsFlutter> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Google Maps'),
+      ),
       body: GoogleMap(
         initialCameraPosition: CameraPosition(
           target: myCurrentLocation,

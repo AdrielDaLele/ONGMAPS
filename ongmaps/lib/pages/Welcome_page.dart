@@ -37,12 +37,26 @@ class _WelcomePageState extends State<WelcomePage>
     _controller.forward();
   }
 
-  void _onTapUp(TapUpDetails details) {
+  void _onTapUp(TapUpDetails details) async {
     _controller.reverse();
-    // Navegando para a página do Google Maps
+
+    // Exibe uma tela de carregamento
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    // Simula um atraso para o carregamento (por exemplo, 2 segundos)
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Fecha a tela de carregamento
+    Navigator.of(context).pop();
+
+    // Navega para a página do Google Maps
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const GoogleMapsFlutter()), // Redireciona para a classe GoogleMapsFlutter
+      MaterialPageRoute(builder: (context) => const GoogleMapsFlutter()),
     );
   }
 
@@ -72,25 +86,6 @@ class _WelcomePageState extends State<WelcomePage>
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class GoogleMapsFlutter extends StatelessWidget {
-  const GoogleMapsFlutter({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Google Maps'),
-      ),
-      body: const GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: LatLng(-23.55052, -46.633309), // Exemplo: São Paulo
-          zoom: 11.0,
         ),
       ),
     );
