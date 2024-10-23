@@ -47,7 +47,7 @@ class _WelcomePageState extends State<WelcomePage>
       builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
-    // Simula um atraso para o carregamento (por exemplo, 2 segundos)
+    // Simula um atraso para o carregamento
     await Future.delayed(const Duration(seconds: 2));
 
     // Fecha a tela de carregamento
@@ -63,30 +63,50 @@ class _WelcomePageState extends State<WelcomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[900], // Fundo azul escuro
-      body: Center(
-        child: GestureDetector(
-          onTapDown: _onTapDown,
-          onTapUp: _onTapUp,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 1.0, end: 1.1).animate(_animation),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 50.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              child: const Text(
-                'ONGMaps',
-                style: TextStyle(
-                  fontSize: 28.0,
-                  color: Color(0xFF0A0A0A), // Azul muito escuro quase preto
-                  fontWeight: FontWeight.bold,
-                ),
+      body: Stack(
+        children: [
+          // Imagem de fundo
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/background_welcome.png'), // Caminho da imagem
+                fit: BoxFit.cover, // Preencher toda a tela mantendo a proporção
               ),
             ),
           ),
-        ),
+          // Conteúdo principal
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center, // Centraliza o conteúdo
+              children: [
+                SizedBox(height: 100), // Espaço para empurrar o botão para baixo
+                GestureDetector(
+                  onTapDown: _onTapDown,
+                  onTapUp: _onTapUp,
+                  child: ScaleTransition(
+                    scale: Tween<double>(begin: 1.0, end: 1.1).animate(_animation),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 50.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.8), // Fundo semitransparente
+                        borderRadius: BorderRadius.circular(30.0),
+                      ),
+                      child: const Text(
+                        'ONGMaps',
+                        style: TextStyle(
+                          fontSize: 28.0,
+                          color: Color(0xFF0A0A0A), // Azul escuro quase preto
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+        ],
       ),
     );
   }
