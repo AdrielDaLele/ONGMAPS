@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart'; // Importa o pacote Flutter Material para widgets e temas.
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // Importa o Google Maps para Flutter.
 import 'package:custom_info_window/custom_info_window.dart'; // Importa a biblioteca para janelas de informações personalizadas.
+import 'package:ongmaps/pages/Descricacao_page.dart'; // Não se esqueça de importar as páginas de descrição.
 
 class GoogleMapsFlutter extends StatefulWidget {
   const GoogleMapsFlutter({super.key}); // Construtor da classe GoogleMapsFlutter.
@@ -10,25 +11,17 @@ class GoogleMapsFlutter extends StatefulWidget {
 }
 
 class _GoogleMapsFlutterState extends State<GoogleMapsFlutter> {
-  // Controlador para gerenciar o comportamento da janela de informações personalizadas
-  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController();
+  final CustomInfoWindowController _customInfoWindowController = CustomInfoWindowController(); // Controlador da janela.
+  Set<Marker> markers = {}; // Marcadores.
 
-  // Conjunto de marcadores a serem exibidos no mapa
-  Set<Marker> markers = {};
-
-  // Lista de coordenadas (LatLng) onde os marcadores serão colocados
   final List<LatLng> latlongPoint = [
-    const LatLng(-22.858249818019033, -47.04822860807837), // Coordenada para ABRAES
-    const LatLng(-22.900747199053033, -47.061201838471305), // Coordenada para IAPI
+    const LatLng(-22.858249818019033, -47.04822860807837), // ABRAES
+    const LatLng(-22.900747199053033, -47.061201838471305), // IAPI
   ];
 
-  // Nomes correspondentes para as localizações
-  final List<String> locationNames = [
-    "  ABRAES",
-    "  IAPI",
-  ];
+  final List<String> locationNames = ["ABRAES", "IAPI"];
+  final List<Widget> locationDescriptions = [const DISCRIPTION_ABRAES(), const DISCRIPTION_IAPI()]; // Atualização para usar widgets
 
-  // URLs de imagens correspondentes para as localizações
   final List<String> locationImages = [
     "https://imgs.search.brave.com/hMgEspYNZw3vsej4ugzJB227HNaFwErw1XZNDCE3O1Q/rs:fit:860:0:0:0/g:ce/aHR0cDovL3d3dy5v/bmdzYnJhc2lsLmNv/bS5ici9pbWFnZXMv/b25ncy1kZS1jcmlh/bmNhcy5qcGc",
     "https://imgs.search.brave.com/Q5LwmAOVKZb7mNtX7haSs1tvohCHVC7vSHH5d3XxTKA/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jbGFz/c2ljLmV4YW1lLmNv/bS93cC1jb250ZW50/L3VwbG9hZHMvMjAy/My8xMC9Gb3RvLTNf/T2ZpY2luYS1jb20t/Y3JpYW5jYXMtbmEt/UGluYWNvdGVjYV9E/aXZ1bGdhY2FvLmpw/Zz9xdWFsaXR5PTcw/JnN0cmlwPWluZm8m/dz0xMDI0dW5kZWZp/bmVk",
@@ -36,96 +29,141 @@ class _GoogleMapsFlutterState extends State<GoogleMapsFlutter> {
 
   @override
   void initState() {
-    super.initState(); // Chama o método initState da classe pai.
+    super.initState();
     displayInfo(); // Inicializa e exibe os marcadores com janelas de informações personalizadas.
   }
 
-  // Função para adicionar marcadores e janelas de informações personalizadas no mapa
   void displayInfo() {
     for (int i = 0; i < latlongPoint.length; i++) {
       markers.add(
         Marker(
-          markerId: MarkerId(i.toString()), // Identificador único para cada marcador.
-          icon: BitmapDescriptor.defaultMarker, // Ícone padrão do marcador.
-          position: latlongPoint[i], // Posição do marcador.
+          markerId: MarkerId(i.toString()),
+          icon: BitmapDescriptor.defaultMarker,
+          position: latlongPoint[i],
           onTap: () {
-            // Quando o marcador é clicado, exibe a janela de informações personalizada.
             _customInfoWindowController.addInfoWindow!(
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white, // Cor de fundo da janela de informações.
-                  borderRadius: BorderRadius.circular(15.0), // Raio de arredondamento geral
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Exibe a imagem correspondente à localização com bordas arredondadas nas pontas superiores.
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only( // Arredonda apenas as pontas superiores
-                        topLeft: Radius.circular(15.0),
-                        topRight: Radius.circular(15.0),
-                      ),
-                      child: Image.network(
-                        locationImages[i],
-                        height: 125,
-                        width: 250,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    // Exibe o nome correspondente à localização.
-                    Text(
-                      locationNames[i],
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    // Exibe estrelas e avaliação.
-                    Row(
-                      children: List.generate(5, (index) {
-                        return const Icon(Icons.star, color: Colors.amber, size: 20);
-                      })..add(const Text("(5)")), // Adiciona a avaliação após as estrelas.
-                    ),
-                  ],
-                ),
-              ),
-              latlongPoint[i], // Posição onde a janela de informações deve ser exibida.
+              _buildInfoWindow(locationNames[i], locationImages[i], i),
+              latlongPoint[i],
             );
           },
         ),
       );
     }
-    setState(() {}); // Atualiza a interface para refletir os marcadores adicionados.
+    setState(() {}); // Atualiza a interface.
   }
+
+  // Função para construir a janela de informações com um botão
+  Widget _buildInfoWindow(String name, String imageUrl, int index) {
+    return Container(
+      width: 250,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15.0),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(15.0),
+              topRight: Radius.circular(15.0),
+            ),
+            child: Image.network(
+              imageUrl,
+              height: 125,
+              width: 250,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return const Center(child: CircularProgressIndicator());
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return const Center(
+                  child: Text(
+                    'Erro ao carregar imagem',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8), // Espaçamento entre o texto e o botão
+                ElevatedButton(
+                  onPressed: () {
+                    // Use o índice para acessar a descrição correta
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => locationDescriptions[index]), // Navegar para a página correta
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white, // Cor de fundo do botão
+                    side: const BorderSide(color: Colors.black), // Cor da borda
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0), // Bordas arredondadas
+                    ),
+                  ),
+                  child: const Icon(Icons.arrow_forward, color: Colors.black), // Ícone da seta
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "ONGMaps",
+          style: TextStyle(
+            fontWeight: FontWeight.bold, // Fonte em negrito
+            color: Colors.white, // Cor branca
+          ),
+        ),
+        backgroundColor: const Color.fromARGB(255, 20, 68, 107), // Cor de fundo escura e levemente transparente
+      ),
       body: Stack(
         children: [
-          // Widget GoogleMap para exibir o mapa.
           GoogleMap(
             initialCameraPosition: const CameraPosition(
-              target: LatLng(-22.912847283240453, -47.041346547261014), // Posição inicial da câmera.
-              zoom: 12  , // Nível de zoom inicial.
+              target: LatLng(-22.912847283240453, -47.041346547261014),
+              zoom: 12,
             ),
-            markers: markers, // Conjunto de marcadores a serem exibidos no mapa.
-            onTap: (argument) {
-              // Esconde a janela de informações personalizada quando o mapa é clicado.
+            markers: markers,
+            onTap: (LatLng position) {
               _customInfoWindowController.hideInfoWindow!();
             },
             onCameraMove: (position) {
-              // Atualiza a posição da janela de informações personalizada quando a câmera se move.
               _customInfoWindowController.onCameraMove!();
             },
             onMapCreated: (GoogleMapController controller) {
-              // Atribui o controlador do mapa ao controlador da janela de informações personalizada.
               _customInfoWindowController.googleMapController = controller;
             },
           ),
-          // Widget que gerencia as janelas de informações personalizadas.
           CustomInfoWindow(
             controller: _customInfoWindowController,
-            height: 171, // Altura da janela de informações personalizada.
-            width: 250, // Largura da janela de informações personalizada.
-            offset: 35, // Deslocamento para posicionar a janela de informações acima do marcador.
+            height: 190,
+            width: 250,
+            offset: 35,
           ),
         ],
       ),
